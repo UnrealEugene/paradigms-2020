@@ -52,8 +52,7 @@ public class BinarySearchShift {
 
     // Pre:  array.length > 0 && существует j из [1; array.length), что для любого i + 1 != j
     //       из [0; array.length - 1) array[i] < array[i + 1], а также array[array.length - 1] < array[0] &&
-    //       0 <= left && left < right && right < array.length && array[left] >= array[0] &&
-    //       array[right] < array[0]
+    //       0 <= left < right < array.length && array[left] >= array[0] > array[right]&&
     // Post: R = j из предусловия
     public static int recursiveFind(int[] array, int left, int right) {
         if (right - left <= 1) {
@@ -63,6 +62,7 @@ public class BinarySearchShift {
             return right;
             // R = right
         } // else
+
         int middle = (left + right) / 2;
         // array.length > 0 && существует j из [1; array.length), что для любого i + 1 != j
         // из [0; array.length - 1) array[i] < array[i + 1], а также array[array.length - 1] < array[0] &&

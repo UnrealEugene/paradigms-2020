@@ -1,27 +1,29 @@
 package queue;
 
+import static queue.ArrayQueueModule.*;
+
 public class ArrayQueueModuleMyTest {
     public static void fillEnd() {
         for (int i = 0; i < 10; i++) {
-            ArrayQueueModule.enqueue(i);
+            enqueue(i);
         }
     }
 
     public static void fillBegin() {
         for (int i = 0; i < 10; i++) {
-            ArrayQueueModule.push(i);
+            push(i);
         }
     }
 
     public static void dumpBegin() {
-        while (!ArrayQueueModule.isEmpty()) {
-            System.out.println(ArrayQueueModule.size() + " " + ArrayQueueModule.element() + " " + ArrayQueueModule.dequeue());
+        while (!isEmpty()) {
+            System.out.println(size() + " " + element() + " " + dequeue());
         }
     }
 
     public static void dumpEnd() {
-        while (!ArrayQueueModule.isEmpty()) {
-            System.out.println(ArrayQueueModule.size() + " " + ArrayQueueModule.peek() + " " + ArrayQueueModule.remove());
+        while (!isEmpty()) {
+            System.out.println(size() + " " + peek() + " " + remove());
         }
     }
 
@@ -31,8 +33,12 @@ public class ArrayQueueModuleMyTest {
         fillBegin();
         dumpBegin();
         fillEnd();
-        System.out.println(ArrayQueueModule.size() + " " + ArrayQueueModule.isEmpty());
-        ArrayQueueModule.clear();
-        System.out.println(ArrayQueueModule.size() + " " + ArrayQueueModule.isEmpty());
+        System.out.println(size() + " " + isEmpty());
+        clear();
+        System.out.println(size() + " " + isEmpty());
+        fillBegin();
+        System.out.println(get(5));
+        set(5, 123);
+        System.out.println(get(5));
     }
 }

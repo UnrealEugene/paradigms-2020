@@ -37,5 +37,9 @@ public class ArrayQueueADTMyTest {
         System.out.println(size(queue) + " " + isEmpty(queue));
         clear(queue);
         System.out.println(size(queue) + " " + isEmpty(queue));
+        fillBegin(queue);
+        System.out.println(get(queue, 5));
+        set(queue, 5, 123);
+        System.out.println(get(queue, 5));
     }
 }
