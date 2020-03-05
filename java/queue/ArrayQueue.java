@@ -5,63 +5,71 @@ import java.util.Arrays;
 // Последовательность a = {a[0], a[1], ..., a[n - 1]}
 // Для любого i из [0; n) a[i] != null
 // n >= 0
-public class ArrayQueue {
+public class ArrayQueue extends AbstractQueue {
     private Object[] elements = new Object[2];
-    private int size;
-    private int head, end;
+    private int head, tail;
 
     // Pre: arg != null
     // Post: a' = {a[0], ..., a[n - 1], arg} && n' = n + 1
+    @Override
     public void enqueue(Object arg) {
         assert arg != null;
         if (size == elements.length) {
             expand();
         }
-        size++;
-        elements[end] = arg;
-        end = (end + 1) % elements.length;
+        elements[tail] = arg;
+        tail = (tail + 1) % elements.length;
+        // size++;
+        super.enqueue(arg);
     }
 
     // Pre: n > 0
     // Post: a' = {a[1], ..., a[n - 1]} && n' = n - 1
     //       R = a[0]
+    @Override
     public Object dequeue() {
         assert !isEmpty();
         Object ret = elements[head];
         elements[head] = null;
         head = (head + 1) % elements.length;
-        size--;
+        // size--;
+        super.dequeue();
         return ret;
     }
 
     // Pre: n > 0
     // Post: a' = a && n' = n
     //       R = a[0]
+    @Override
     public Object element() {
         assert !isEmpty();
         return elements[head];
     }
 
-    // Pre: true
-    // Post: a' = a && n' = n
-    //       R = n
-    public int size() {
-        return size;
-    }
+//    // Pre: true
+//    // Post: a' = a && n' = n
+//    //       R = n
+//    @Override
+//    public int size() {
+//        return size;
+//    }
 
-    // Pre: true
-    // Post: a' = a && n' = n
-    //       R = (n == 0)
-    public boolean isEmpty() {
-        return size() == 0;
-    }
+//    // Pre: true
+//    // Post: a' = a && n' = n
+//    //       R = (n == 0)
+//    @Override
+//    public boolean isEmpty() {
+//        return size() == 0;
+//    }
 
     // Pre: true
     // Post: a' = { } && n' = 0
+    @Override
     public void clear() {
-        while (!isEmpty()) {
-            dequeue();
-        }
+        elements = new Object[2];
+        head = 0;
+        tail = 0;
+        super.clear();
     }
 
     // Pre: true
@@ -92,7 +100,7 @@ public class ArrayQueue {
     //       R = a[n - 1]
     public Object peek() {
         assert !isEmpty();
-        return elements[(end + elements.length - 1) % elements.length];
+        return elements[(tail + elements.length - 1) % elements.length];
     }
 
     // Pre: n > 0
@@ -100,9 +108,9 @@ public class ArrayQueue {
     //       R = a[n - 1]
     public Object remove() {
         assert !isEmpty();
-        end = (end + elements.length - 1) % elements.length;
-        Object ret = elements[end];
-        elements[end] = null;
+        tail = (tail + elements.length - 1) % elements.length;
+        Object ret = elements[tail];
+        elements[tail] = null;
         size--;
         return ret;
     }
