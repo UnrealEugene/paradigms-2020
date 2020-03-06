@@ -62,9 +62,8 @@ public class ArrayQueueADT {
     // Post: a' = { } && n' = 0
     public static void clear(ArrayQueueADT queue) {
         assert queue != null;
-        while (!isEmpty(queue)) {
-            dequeue(queue);
-        }
+        queue.elements = new Object[2];
+        queue.size = 0;
     }
 
     // Pre: queue != null
