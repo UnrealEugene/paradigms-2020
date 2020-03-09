@@ -30,7 +30,7 @@ public class LinkedQueue extends AbstractQueue {
             tail.next = t;
         }
         tail = t;
-        super.enqueue(arg);
+        super.add();
     }
 
     // Pre: n > 0
@@ -44,7 +44,7 @@ public class LinkedQueue extends AbstractQueue {
         if (head == null) {
             tail = null;
         }
-        super.dequeue();
+        super.delete();
         return result;
     }
 
@@ -76,14 +76,13 @@ public class LinkedQueue extends AbstractQueue {
             if (head == null) {
                 tail = null;
             }
-        }
-        if (node == tail) {
+        } else if (node == tail) {
             tail = prev;
             if (tail == null) {
                 head = null;
             }
         }
-        size--;
+        super.delete();
     }
 
     // Pre: true
@@ -92,55 +91,11 @@ public class LinkedQueue extends AbstractQueue {
     //       pred(a[t]) == false && a' = {a[i_0], a[i_1], ..., a[i_(k-1)]} && n' = k
     @Override
     public void removeIf(Predicate<Object> pred) {
-        System.err.println("removeIf " + pred);
-        for (Node cur = head, prev = null; cur != tail; prev = cur, cur = cur.next) {
+        for (Node cur = head, prev = null; cur != null; cur = cur.next) {
             if (pred.test(cur.val)) {
                 remove(cur, prev);
-            }
-        }
-    }
-
-    // Pre: true
-    // Post: ∀ j ∈ [0; k - 2]: i_j < i_(j+1) && ∀ j ∈ [0; k - 1]: i_j ∈ [0; n - 1],
-    //       pred(a[i_j]) == false && ∀ t ∈ [0; n - 1]: ∀ j ∈ [0; k - 1] t != i_j =>
-    //       pred(a[t]) == true && a' = {a[i_0], a[i_1], ..., a[i_(k-1)]} && n' = k
-    @Override
-    public void retainIf(Predicate<Object> pred) {
-        System.err.println("retainIf " + pred);
-        for (Node cur = head, prev = null; cur != tail; prev = cur, cur = cur.next) {
-            if (!pred.test(cur.val)) {
-                remove(cur, prev);
-            }
-        }
-    }
-
-    // Pre: true
-    // Post: k = max i ∈ [0; n - 1]: ∀ j ∈ [0; k - 1] pred(a[j]) == true &&
-    // a' = {a[0], a[1], ..., a[k - 1]} && n' = k
-    @Override
-    public void takeWhile(Predicate<Object> pred) {
-        System.err.println("takeWhile " + pred);
-        boolean del = false;
-        for (Node cur = head, prev = null; cur != tail; prev = cur, cur = cur.next) {
-            if (del || !pred.test(cur.val)) {
-                del = true;
-                remove(cur, prev);
-            }
-        }
-    }
-
-    // Pre: true
-    // Post: k = max i ∈ [0; n - 1]: ∀ j ∈ [0; k - 1] pred(a[j]) == false &&
-    // a' = {a[k], a[k+1], ..., a[n - 1]} && n' = n - k
-    @Override
-    public void dropWhile(Predicate<Object> pred) {
-        System.err.println("dropWhile " + pred);
-        boolean del = true;
-        for (Node cur = head, prev = null; cur != tail; prev = cur, cur = cur.next) {
-            if (!pred.test(cur.val) && del) {
-                remove(cur, prev);
             } else {
-                del = false;
+                prev = cur;
             }
         }
     }

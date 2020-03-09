@@ -1,8 +1,5 @@
 package queue;
 
-import static queue.ArrayQueueADT.get;
-import static queue.ArrayQueueADT.set;
-
 public class ArrayQueueMyTest {
     public static void fillEnd(ArrayQueue queue) {
         for (int i = 0; i < 10; i++) {
@@ -24,7 +21,7 @@ public class ArrayQueueMyTest {
 
     public static void dumpEnd(ArrayQueue queue) {
         while (!queue.isEmpty()) {
-            System.out.println(queue.size() + " " + queue.peek() + " " + queue.remove());
+            System.out.println(queue.size() + " " + queue.peek() + " " + queue.delete());
         }
     }
 
