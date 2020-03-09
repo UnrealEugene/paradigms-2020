@@ -51,7 +51,7 @@
     * Дублирования кода быть не должно
     * [Исходный код тестов](java/queue/QueueFunctionsTest.java)
     * [Откомпилированные тесты](artifacts/queue/QueueFunctionsTest.jar)
- * *IfWhile*
+ * *IfWhile* **(Моя модификация)**
     * Добавить в интерфейс очереди и реализовать методы
         * `removeIf(predicate)` – удалить элементы, удовлетворяющие
             [предикату](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/Predicate.html)
@@ -94,7 +94,7 @@
         * `remove` – вернуть и удалить последний элемент из очереди
     * [Исходный код тестов](java/queue/ArrayQueueDequeTest.java)
     * [Откомпилированные тесты](artifacts/queue/ArrayQueueDequeTest.jar)
- * *IndexedDeque*
+ * *IndexedDeque* **(Моя модификация)**
     * Реализовать модификацию *Deque*
     * Реализовать методы
         * `get` – получить элемент по индексу, отсчитываемому с головы
@@ -126,7 +126,7 @@
     * Класс должен иметь имя `BinarySearchSpan`
     * [Исходный код тестов](java/search/BinarySearchSpanTest.java)
     * [Откомпилированные тесты](artifacts/search/BinarySearchSpanTest.jar)
- * *Shift*
+ * *Shift* **(Моя модификация)**
     * На вход подается отсортированный массив, циклически сдвинутый на `k`
       элементов. Требуется найти `k`. Все числа в массиве различны.
     * Класс должен иметь имя `BinarySearchShift`
@@ -145,12 +145,12 @@
     * Нельзя использовать типы `long` и `double`
     * Нельзя использовать методы классов `Math` и `StrictMath`
     * [Исходный код тестов](java/expression/exceptions/ExceptionsTest.java)
- * *PowLog2*
+ * *PowLog2* **(Моя модификация)**
     * Дополнительно реализуйте унарные операции:
         * `log2` – логарифм по уснованию 2, `log2 10` равно 3;
         * `pow2` – два в степени, `pow2 4` равно 16.
     * [Исходный код тестов](java/expression/exceptions/ExceptionsPowLog2Test.java)
- * *PowLog*
+ * *PowLog* **(Моя модификация)**
     * Дополнительно реализуйте бинарные операции (максимальный приоритет):
         * `**` – возведение в степень, `2 ** 3` равно 8;
         * `//` – логарифм, `10 // 2` равно 3.
