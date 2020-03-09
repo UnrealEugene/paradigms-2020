@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="ArrayQueueTest">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/artifacts/queue/ArrayQueueTest.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
