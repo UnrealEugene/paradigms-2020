@@ -2,6 +2,8 @@ package expression.generic;
 
 import expression.exceptions.ExpressionCalculateException;
 
+import java.util.Locale;
+import java.util.Scanner;
 import java.util.function.Function;
 
 
@@ -11,9 +13,21 @@ public class GenericTabulator implements Tabulator {
             String mode, String expression, int x1, int x2, int y1, int y2, int z1, int z2
     ) {
         switch (mode) {
+            case "b":
+                return tabulate(new ExpressionParser<>(MyByte::parse).parse(expression),
+                        MyByte::new, x1, x2, y1, y2, z1, z2);
+            case "s":
+                return tabulate(new ExpressionParser<>(MyShort::parse).parse(expression),
+                        MyShort::new, x1, x2, y1, y2, z1, z2);
             case "i":
-                return tabulate(new ExpressionParser<>(MyInteger::parse).parse(expression),
-                        MyInteger::new, x1, x2, y1, y2, z1, z2);
+                return tabulate(new ExpressionParser<>(MyCheckedInt::parse).parse(expression),
+                        MyCheckedInt::new, x1, x2, y1, y2, z1, z2);
+            case "l":
+                return tabulate(new ExpressionParser<>(MyLong::parse).parse(expression),
+                        MyLong::new, x1, x2, y1, y2, z1, z2);
+            case "f":
+                return tabulate(new ExpressionParser<>(MyFloat::parse).parse(expression),
+                        MyFloat::new, x1, x2, y1, y2, z1, z2);
             case "d":
                 return tabulate(new ExpressionParser<>(MyDouble::parse).parse(expression),
                         MyDouble::new, x1, x2, y1, y2, z1, z2);
@@ -21,7 +35,7 @@ public class GenericTabulator implements Tabulator {
                 return tabulate(new ExpressionParser<>(MyBigInt::parse).parse(expression),
                         MyBigInt::new, x1, x2, y1, y2, z1, z2);
             default:
-                throw new IllegalArgumentException("Unknown type '" + mode + "'");
+                throw new IllegalArgumentException("Unknown type identifier '" + mode + "'");
         }
     }
 
@@ -46,5 +60,17 @@ public class GenericTabulator implements Tabulator {
             }
         }
         return result;
+    }
+
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in).useLocale(Locale.US);
+        TripleExpression<MyDouble> exp =
+                new ExpressionParser<>(MyDouble::parse).parse(in.nextLine());
+        System.out.println(exp);
+        System.out.println(exp.evaluate(
+                new MyDouble(in.nextDouble()),
+                new MyDouble(in.nextDouble()),
+                new MyDouble(in.nextDouble())
+        ).getValue());
     }
 }
