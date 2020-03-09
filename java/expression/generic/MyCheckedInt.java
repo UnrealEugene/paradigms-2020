@@ -4,15 +4,15 @@ import expression.exceptions.ExpressionCalculateException;
 import expression.exceptions.ExpressionDBZException;
 import expression.exceptions.ExpressionOverflowException;
 
-public class MyInteger implements MyNumber<MyInteger> {
+public class MyCheckedInt implements MyNumber<MyCheckedInt> {
     private final int value;
 
-    public MyInteger(Number value) {
+    public MyCheckedInt(Number value) {
         this.value = value.intValue();
     }
 
     @Override
-    public MyInteger add(MyInteger other) {
+    public MyCheckedInt add(MyCheckedInt other) {
         int left = value, right = other.value;
         if (left > right) {
             int t = right;
@@ -29,11 +29,11 @@ public class MyInteger implements MyNumber<MyInteger> {
                         ("Addition overflow: " + left + " + " + right + " < " + Integer.MIN_VALUE);
             }
         }
-        return new MyInteger(left + right);
+        return new MyCheckedInt(left + right);
     }
 
     @Override
-    public MyInteger subtract(MyInteger other) {
+    public MyCheckedInt subtract(MyCheckedInt other) {
         int left = value, right = other.value;
         if (left >= 0 && right <= 0 && left > Integer.MAX_VALUE + right) {
             throw new ExpressionCalculateException
@@ -43,11 +43,11 @@ public class MyInteger implements MyNumber<MyInteger> {
             throw new ExpressionCalculateException
                     ("Subtract overflow: " + left + " - " + right + " < " + Integer.MIN_VALUE);
         }
-        return new MyInteger(left - right);
+        return new MyCheckedInt(left - right);
     }
 
     @Override
-    public MyInteger multiply(MyInteger other) {
+    public MyCheckedInt multiply(MyCheckedInt other) {
         int left = value, right = other.value;
         if (left > 0) {
             if (right > 0) {
@@ -74,11 +74,11 @@ public class MyInteger implements MyNumber<MyInteger> {
                 }
             }
         }
-        return new MyInteger(left * right);
+        return new MyCheckedInt(left * right);
     }
 
     @Override
-    public MyInteger divide(MyInteger other) {
+    public MyCheckedInt divide(MyCheckedInt other) {
         int left = value, right = other.value;
         if (right == 0) {
             throw new ExpressionDBZException("Division by zero: " + left + " / " + right);
@@ -87,16 +87,16 @@ public class MyInteger implements MyNumber<MyInteger> {
             throw new ExpressionOverflowException
                     ("Divide overflow: " + left + " / " + right + " > " + Integer.MAX_VALUE);
         }
-        return new MyInteger(left / right);
+        return new MyCheckedInt(left / right);
     }
 
     @Override
-    public MyInteger negate() {
-        return new MyInteger(-value);
+    public MyCheckedInt negate() {
+        return new MyCheckedInt(-value);
     }
 
-    public static MyInteger parse(String str) {
-        return new MyInteger(Integer.parseInt(str));
+    public static MyCheckedInt parse(String str) {
+        return new MyCheckedInt(Integer.parseInt(str));
     }
 
     @Override
