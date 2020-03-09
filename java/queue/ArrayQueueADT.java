@@ -8,7 +8,7 @@ import java.util.Arrays;
 public class ArrayQueueADT {
     private Object[] elements = new Object[2];
     private int size;
-    private int head, end;
+    private int head, tail;
 
     // Pre: arg != null && queue != null
     // Post: a' = {a[0], ..., a[n - 1], arg} && n' = n + 1
@@ -18,8 +18,8 @@ public class ArrayQueueADT {
             expand(queue);
         }
         queue.size++;
-        queue.elements[queue.end] = arg;
-        queue.end = (queue.end + 1) % queue.elements.length;
+        queue.elements[queue.tail] = arg;
+        queue.tail = (queue.tail + 1) % queue.elements.length;
     }
 
     // Pre: n > 0 && queue != null
@@ -64,6 +64,8 @@ public class ArrayQueueADT {
         assert queue != null;
         queue.elements = new Object[2];
         queue.size = 0;
+        queue.head = 0;
+        queue.tail = 0;
     }
 
     // Pre: queue != null
@@ -95,7 +97,7 @@ public class ArrayQueueADT {
     //       R = a[n - 1]
     public static Object peek(ArrayQueueADT queue) {
         assert !isEmpty(queue);
-        return queue.elements[(queue.end + queue.elements.length - 1) % queue.elements.length];
+        return queue.elements[(queue.tail + queue.elements.length - 1) % queue.elements.length];
     }
 
     // Pre: n > 0 && queue != null
@@ -103,9 +105,9 @@ public class ArrayQueueADT {
     //       R = a[n - 1]
     public static Object remove(ArrayQueueADT queue) {
         assert !isEmpty(queue);
-        queue.end = (queue.end + queue.elements.length - 1) % queue.elements.length;
-        Object ret = queue.elements[queue.end];
-        queue.elements[queue.end] = null;
+        queue.tail = (queue.tail + queue.elements.length - 1) % queue.elements.length;
+        Object ret = queue.elements[queue.tail];
+        queue.elements[queue.tail] = null;
         queue.size--;
         return ret;
     }

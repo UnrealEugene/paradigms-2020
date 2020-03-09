@@ -8,7 +8,7 @@ import java.util.Arrays;
 public class ArrayQueueModule {
     private static Object[] elements = new Object[2];
     private static int size;
-    private static int head, end;
+    private static int head, tail;
 
     // Pre: arg != null
     // Post: a' = {a[0], ..., a[n - 1], arg} && n' = n + 1
@@ -18,8 +18,8 @@ public class ArrayQueueModule {
             expand();
         }
         size++;
-        elements[end] = arg;
-        end = (end + 1) % elements.length;
+        elements[tail] = arg;
+        tail = (tail + 1) % elements.length;
     }
 
     // Pre: n > 0
@@ -59,9 +59,10 @@ public class ArrayQueueModule {
     // Pre: true
     // Post: a' = { } && n' = 0
     public static void clear() {
-        while (!isEmpty()) {
-            dequeue();
-        }
+        elements = new Object[2];
+        size = 0;
+        head = 0;
+        tail = 0;
     }
 
     // Pre: true
@@ -92,7 +93,7 @@ public class ArrayQueueModule {
     //       R = a[n - 1]
     public static Object peek() {
         assert !isEmpty();
-        return elements[(end + elements.length - 1) % elements.length];
+        return elements[(tail + elements.length - 1) % elements.length];
     }
 
     // Pre: n > 0
@@ -100,9 +101,9 @@ public class ArrayQueueModule {
     //       R = a[n - 1]
     public static Object remove() {
         assert !isEmpty();
-        end = (end + elements.length - 1) % elements.length;
-        Object ret = elements[end];
-        elements[end] = null;
+        tail = (tail + elements.length - 1) % elements.length;
+        Object ret = elements[tail];
+        elements[tail] = null;
         size--;
         return ret;
     }
