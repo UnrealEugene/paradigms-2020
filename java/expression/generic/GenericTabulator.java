@@ -19,6 +19,9 @@ public class GenericTabulator implements Tabulator {
             case "s":
                 return tabulate(new ExpressionParser<>(MyShort::parse).parse(expression),
                         MyShort::new, x1, x2, y1, y2, z1, z2);
+            case "u":
+                return tabulate(new ExpressionParser<>(MyInteger::parse).parse(expression),
+                        MyInteger::new, x1, x2, y1, y2, z1, z2);
             case "i":
                 return tabulate(new ExpressionParser<>(MyCheckedInt::parse).parse(expression),
                         MyCheckedInt::new, x1, x2, y1, y2, z1, z2);

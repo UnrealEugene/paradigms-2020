@@ -5,7 +5,7 @@ import expression.parser.StringSource;
 
 import java.util.List;
 
-interface NumberParser<T> {
+interface MyNumberParser<T extends MyNumber<T>> {
     T parse(String str);
 }
 
@@ -18,9 +18,9 @@ public class ExpressionParser <T extends MyNumber<T>> extends BaseParser<T> {
     );
     private static final int MIN_PRIORITY = UNARY_PRIORITY - LEVELS.size();
     private static final int CONST_PRIORITY = UNARY_PRIORITY + 1;
-    private final NumberParser<T> numberParser;
+    private final MyNumberParser<T> numberParser;
 
-    public ExpressionParser(NumberParser<T> numberParser) {
+    public ExpressionParser(MyNumberParser<T> numberParser) {
         this.numberParser = numberParser;
     }
 
@@ -80,7 +80,6 @@ public class ExpressionParser <T extends MyNumber<T>> extends BaseParser<T> {
             default:
                 return proceedUnary(op, parseExpression(UNARY_PRIORITY));
         }
-
     }
 
     private MultipleExpression<T> parseConst() {
