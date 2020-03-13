@@ -145,7 +145,9 @@ public class ExpressionParser <T extends MyNumber<T>> extends BaseParser<T> {
 
     private Const<T> parseNumber(boolean sign) {
         StringBuilder result = new StringBuilder(sign ? "-" : "");
-        while (checkBetween('0', '9') || check('.', false)) {
+        while (checkBetween('0', '9') || check('.', false) ||
+                check(',', false) || check('e', false) ||
+                check('E', false)) {
             result.append(currentSource.current());
             currentSource.moveNext();
         }

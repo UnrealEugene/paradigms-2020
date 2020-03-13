@@ -35,15 +35,15 @@ public interface Queue {
     void clear();
 
     // Pre: true
-    // Post: ∀ j ∈ [0; k - 2]: i_j < i_(j+1) && ∀ j ∈ [0; k - 1]: i_j ∈ [0; n - 1],
-    //       pred(a[i_j]) == true && ∀ t ∈ [0; n - 1]: ∀ j ∈ [0; k - 1] t != i_j =>
-    //       pred(a[t]) == false && a' = {a[i_0], a[i_1], ..., a[i_(k-1)]} && n' = k
+    // Post: p - подпоследовательность a && ∀ p_i: pred[p_i] = true &&
+    //       q - подпоследовательность a && q = a \ p && ∀ p_i: pred[q_i] = true &&
+    //       a' = p && n' = |p|
     void removeIf(Predicate<Object> pred);
 
     // Pre: true
-    // Post: ∀ j ∈ [0; k - 2]: i_j < i_(j+1) && ∀ j ∈ [0; k - 1]: i_j ∈ [0; n - 1],
-    //       pred(a[i_j]) == false && ∀ t ∈ [0; n - 1]: ∀ j ∈ [0; k - 1] t != i_j =>
-    //       pred(a[t]) == true && a' = {a[i_0], a[i_1], ..., a[i_(k-1)]} && n' = k
+    // Post: p - подпоследовательность a && ∀ p_i: pred[p_i] = true &&
+    //       q - подпоследовательность a && q = a \ p && ∀ p_i: pred[q_i] = true &&
+    //       a' = p && n' = |p|
     void retainIf(Predicate<Object> pred);
 
     // Pre: true

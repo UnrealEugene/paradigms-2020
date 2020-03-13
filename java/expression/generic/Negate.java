@@ -8,7 +8,7 @@ public class Negate <T extends MyNumber<T>> extends UnaryOperation<T> {
 
     @Override
     public String toString() {
-        return super.toString("*");
+        return super.toString("-");
     }
 
     @Override

@@ -1,7 +1,6 @@
 package queue;
 
 import java.util.Arrays;
-import java.util.function.Predicate;
 
 // Последовательность a = {a[0], a[1], ..., a[n - 1]}
 // Для любого i из [0; n) a[i] != null
@@ -54,26 +53,6 @@ public class ArrayQueue extends AbstractQueue {
     }
 
     // Pre: true
-    // Post: ∀ j ∈ [0; k - 2]: i_j < i_(j+1) && ∀ j ∈ [0; k - 1]: i_j ∈ [0; n - 1],
-    //       pred(a[i_j]) == true && ∀ t ∈ [0; n - 1]: ∀ j ∈ [0; k - 1] t != i_j =>
-    //       pred(a[t]) == false && a' = {a[i_0], a[i_1], ..., a[i_(k-1)]} && n' = k
-    @Override
-    public void removeIf(Predicate<Object> pred) {
-        Object[] newElements = new Object[elements.length];
-        int newTail = 0;
-        for (int i = head; i != tail; i = (i + 1) % elements.length) {
-            if (!pred.test(elements[i])) { // keep
-                newElements[newTail++] = elements[i];
-            } else {
-                super.delete();
-            }
-        }
-        head = 0;
-        tail = newTail;
-        elements = newElements;
-    }
-
-    // Pre: true
     // Post: a' = a && n' = n && elements'.length == elements.length * 2
     private void expand() {
         if ((tail - head + elements.length) % elements.length == elements.length - 1) {
@@ -86,8 +65,6 @@ public class ArrayQueue extends AbstractQueue {
             }
         }
     }
-
-
 
     // Pre: arg != null
     // Post: a' = {arg, a[0], ..., a[n - 1]} && n' = n + 1
