@@ -40,9 +40,9 @@ public abstract class AbstractQueue implements Queue {
         size++;
     }
 
-    // Pre: true
+    // Pre: pred != null
     // Post: p - подпоследовательность a && ∀ p_i: pred[p_i] = true &&
-    //       q - подпоследовательность a && q = a \ p && ∀ p_i: pred[q_i] = true &&
+    //       q - подпоследовательность a && q = a \ p && ∀ q_i: pred[q_i] = true &&
     //       a' = p && n' = |p|
     public void removeIf(Predicate<Object> pred) {
         int tempSize = size;
@@ -54,15 +54,15 @@ public abstract class AbstractQueue implements Queue {
         }
     }
 
-    // Pre: true
+    // Pre: pred != null
     // Post: p - подпоследовательность a && ∀ p_i: pred[p_i] = true &&
-    //       q - подпоследовательность a && q = a \ p && ∀ p_i: pred[q_i] = true &&
+    //       q - подпоследовательность a && q = a \ p && ∀ q_i: pred[q_i] = true &&
     //       a' = p && n' = |p|
     public void retainIf(Predicate<Object> pred) {
         removeIf(Predicate.not(pred));
     }
 
-    // Pre: true
+    // Pre: pred != null
     // Post: k = max i ∈ [0; n - 1]: ∀ j ∈ [0; k - 1] pred(a[j]) == true &&
     // a' = {a[0], a[1], ..., a[k - 1]} && n' = k
     public void takeWhile(Predicate<Object> pred) {
@@ -70,7 +70,7 @@ public abstract class AbstractQueue implements Queue {
         removeIf(x -> delete[0] |= !pred.test(x));
     }
 
-    // Pre: true
+    // Pre: pred != null
     // Post: k = max i ∈ [0; n - 1]: ∀ j ∈ [0; k - 1] pred(a[j]) == false &&
     // a' = {a[k], a[k+1], ..., a[n - 1]} && n' = n - k
     public void dropWhile(Predicate<Object> pred) {

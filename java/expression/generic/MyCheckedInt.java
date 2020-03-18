@@ -90,9 +90,25 @@ public class MyCheckedInt implements MyNumber<MyCheckedInt> {
         return new MyCheckedInt(left / right);
     }
 
+
+
     @Override
     public MyCheckedInt negate() {
+        if (value == Integer.MIN_VALUE) {
+            throw new ExpressionOverflowException
+                    ("Negate overflow: -(" + value + ") > " + Integer.MAX_VALUE);
+        }
         return new MyCheckedInt(-value);
+    }
+
+    @Override
+    public MyCheckedInt bitCount() {
+        return new MyCheckedInt(Integer.bitCount(value));
+    }
+
+    @Override
+    public int compareWith(MyCheckedInt other) {
+        return Integer.compare(value, other.value);
     }
 
     public static MyCheckedInt parse(String str) {

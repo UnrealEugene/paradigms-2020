@@ -12,9 +12,9 @@ interface MyNumberParser<T extends MyNumber<T>> {
 public class ExpressionParser <T extends MyNumber<T>> extends BaseParser<T> {
     private static final int UNARY_PRIORITY = 0;
     private static final List<List<String>> LEVELS = List.of(
-//            List.of("**", "//"),
             List.of("*", "/"),
-            List.of("+", "-")
+            List.of("+", "-"),
+            List.of("min", "max")
     );
     private static final int MIN_PRIORITY = UNARY_PRIORITY - LEVELS.size();
     private static final int CONST_PRIORITY = UNARY_PRIORITY + 1;
@@ -109,10 +109,6 @@ public class ExpressionParser <T extends MyNumber<T>> extends BaseParser<T> {
             String op, MultipleExpression<T> left, MultipleExpression<T> right
     ) {
         switch (op) {
-//            case "**":
-//                return new CheckedPow(left, right);
-//            case "//":
-//                return new CheckedLog(left, right);
             case "*":
                 return new Multiply<>(left, right);
             case "/":
@@ -121,6 +117,10 @@ public class ExpressionParser <T extends MyNumber<T>> extends BaseParser<T> {
                 return new Add<>(left, right);
             case "-":
                 return new Subtract<>(left, right);
+            case "min":
+                return new Minimum<>(left, right);
+            case "max":
+                return new Maximum<>(left, right);
             default:
                 throw new ParserUnresolvedOperationException
                         ("Unknown binary operation '" + op + "'");
@@ -130,12 +130,8 @@ public class ExpressionParser <T extends MyNumber<T>> extends BaseParser<T> {
     private MultipleExpression<T> proceedUnary(String op, MultipleExpression<T> arg) {
         //noinspection SwitchStatementWithTooFewBranches
         switch (op) {
-//            case "-": // calculates apart
-//                return new CheckedNegate(arg);
-//            case "log2":
-//                return new CheckedLog2(arg);
-//            case "pow2":
-//                return new CheckedPow2(arg);
+            case "count":
+                return new BitCount<>(arg);
             default:
                 throw new ParserUnresolvedOperationException
                         ("Unknown unary operation '" + op + "'");

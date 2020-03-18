@@ -32,6 +32,16 @@ public class MyDouble implements MyNumber<MyDouble> {
         return new MyDouble(-value);
     }
 
+    @Override
+    public MyDouble bitCount() {
+        return new MyDouble((double) Long.bitCount(Double.doubleToLongBits(value)));
+    }
+
+    @Override
+    public int compareWith(MyDouble other) {
+        return Double.compare(value, other.value);
+    }
+
     public static MyDouble parse(String str) {
         return new MyDouble(Double.parseDouble(str));
     }

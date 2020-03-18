@@ -32,6 +32,16 @@ public class MyInteger implements MyNumber<MyInteger> {
         return new MyInteger(-value);
     }
 
+    @Override
+    public MyInteger bitCount() {
+        return new MyInteger(Integer.bitCount(value));
+    }
+
+    @Override
+    public int compareWith(MyInteger other) {
+        return Integer.compare(value, other.value);
+    }
+
     public static MyInteger parse(String str) {
         return new MyInteger(Integer.parseInt(str));
     }

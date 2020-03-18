@@ -16,18 +16,18 @@ public class GenericTabulator implements Tabulator {
             case "b":
                 return tabulate(new ExpressionParser<>(MyByte::parse).parse(expression),
                         MyByte::new, x1, x2, y1, y2, z1, z2);
-            case "s":
-                return tabulate(new ExpressionParser<>(MyShort::parse).parse(expression),
-                        MyShort::new, x1, x2, y1, y2, z1, z2);
+//            case "s":
+//                return tabulate(new ExpressionParser<>(MyShort::parse).parse(expression),
+//                        MyShort::new, x1, x2, y1, y2, z1, z2);
             case "u":
                 return tabulate(new ExpressionParser<>(MyInteger::parse).parse(expression),
                         MyInteger::new, x1, x2, y1, y2, z1, z2);
             case "i":
                 return tabulate(new ExpressionParser<>(MyCheckedInt::parse).parse(expression),
                         MyCheckedInt::new, x1, x2, y1, y2, z1, z2);
-            case "l":
-                return tabulate(new ExpressionParser<>(MyLong::parse).parse(expression),
-                        MyLong::new, x1, x2, y1, y2, z1, z2);
+//            case "l":
+//                return tabulate(new ExpressionParser<>(MyLong::parse).parse(expression),
+//                        MyLong::new, x1, x2, y1, y2, z1, z2);
             case "f":
                 return tabulate(new ExpressionParser<>(MyFloat::parse).parse(expression),
                         MyFloat::new, x1, x2, y1, y2, z1, z2);
@@ -56,9 +56,7 @@ public class GenericTabulator implements Tabulator {
                                 createFunc.apply(y),
                                 createFunc.apply(z)
                         ).getValue();
-                    } catch (ExpressionCalculateException | ArithmeticException e) {
-                        result[x - x1][y - y1][z - z1] = null;
-                    }
+                    } catch (ExpressionCalculateException | ArithmeticException ignored) { }
                 }
             }
         }

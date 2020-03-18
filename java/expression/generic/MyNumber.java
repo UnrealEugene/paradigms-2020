@@ -11,5 +11,9 @@ public interface MyNumber<T> {
 
     T negate();
 
+    T bitCount();
+
+    int compareWith(T other);
+
     Number getValue();
 }

@@ -32,6 +32,16 @@ public class MyFloat implements MyNumber<MyFloat> {
         return new MyFloat(-value);
     }
 
+    @Override
+    public MyFloat bitCount() {
+        return new MyFloat((float) Integer.bitCount(Float.floatToIntBits(value)));
+    }
+
+    @Override
+    public int compareWith(MyFloat other) {
+        return Float.compare(value, other.value);
+    }
+
     public static MyFloat parse(String str) {
         return new MyFloat(Float.parseFloat(str));
     }

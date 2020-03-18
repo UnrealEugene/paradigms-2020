@@ -32,6 +32,16 @@ public class MyByte implements MyNumber<MyByte> {
         return new MyByte(-value);
     }
 
+    @Override
+    public MyByte bitCount() {
+        return new MyByte((byte) Integer.bitCount(value & 0xff));
+    }
+
+    @Override
+    public int compareWith(MyByte other) {
+        return Byte.compare(value, other.value);
+    }
+
     public static MyByte parse(String str) {
         return new MyByte(Byte.parseByte(str));
     }

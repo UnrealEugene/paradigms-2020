@@ -34,6 +34,16 @@ public class MyBigInt implements MyNumber<MyBigInt> {
         return new MyBigInt(value.negate());
     }
 
+    @Override
+    public MyBigInt bitCount() {
+        return new MyBigInt(value.bitCount());
+    }
+
+    @Override
+    public int compareWith(MyBigInt other) {
+        return value.compareTo(other.value);
+    }
+
     public static MyBigInt parse(String str) {
         return new MyBigInt(new BigInteger(str));
     }
