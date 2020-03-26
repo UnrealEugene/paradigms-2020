@@ -1,10 +1,8 @@
 package expression.generic;
 
-public class MyDouble implements MyNumber<MyDouble> {
-    private final double value;
-
-    public MyDouble(Number value) {
-        this.value = value.doubleValue();
+public class MyDouble extends MyNumber<MyDouble, Double> {
+    public MyDouble(double value) {
+        super(value);
     }
 
     @Override
@@ -34,7 +32,7 @@ public class MyDouble implements MyNumber<MyDouble> {
 
     @Override
     public MyDouble bitCount() {
-        return new MyDouble((double) Long.bitCount(Double.doubleToLongBits(value)));
+        return new MyDouble(Long.bitCount(Double.doubleToLongBits(value)));
     }
 
     @Override
@@ -44,15 +42,5 @@ public class MyDouble implements MyNumber<MyDouble> {
 
     public static MyDouble parse(String str) {
         return new MyDouble(Double.parseDouble(str));
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public Number getValue() {
-        return value;
     }
 }

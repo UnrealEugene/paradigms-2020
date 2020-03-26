@@ -1,12 +1,13 @@
 package expression.generic;
 
+import expression.exceptions.ExpressionCalculateException;
+import expression.exceptions.ExpressionDBZException;
+
 import java.math.BigInteger;
 
-public class MyBigInt implements MyNumber<MyBigInt> {
-    private final BigInteger value;
-
-    public MyBigInt(Number value) {
-        this.value = new BigInteger(String.valueOf(value));
+public class MyBigInt extends MyNumber<MyBigInt, BigInteger> {
+    public MyBigInt(BigInteger value) {
+        super(value);
     }
 
     @Override
@@ -26,7 +27,12 @@ public class MyBigInt implements MyNumber<MyBigInt> {
 
     @Override
     public MyBigInt divide(MyBigInt other) {
-        return new MyBigInt(value.divide(other.value));
+        try {
+            return new MyBigInt(value.divide(other.value));
+        } catch (ArithmeticException e) {
+            throw new ExpressionDBZException
+                    ("Division by zero: " + value + " / " + other.value, e);
+        }
     }
 
     @Override
@@ -36,7 +42,7 @@ public class MyBigInt implements MyNumber<MyBigInt> {
 
     @Override
     public MyBigInt bitCount() {
-        return new MyBigInt(value.bitCount());
+        return new MyBigInt(new BigInteger(String.valueOf(value.bitCount())));
     }
 
     @Override
@@ -46,15 +52,5 @@ public class MyBigInt implements MyNumber<MyBigInt> {
 
     public static MyBigInt parse(String str) {
         return new MyBigInt(new BigInteger(str));
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public Number getValue() {
-        return value;
     }
 }

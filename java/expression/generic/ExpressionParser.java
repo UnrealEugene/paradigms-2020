@@ -4,12 +4,12 @@ import expression.exceptions.*;
 import expression.parser.StringSource;
 
 import java.util.List;
+//
+//interface MyNumberParser <T extends MyNumber<T, ? extends Number>> {
+//    T parse(String str);
+//}
 
-interface MyNumberParser<T extends MyNumber<T>> {
-    T parse(String str);
-}
-
-public class ExpressionParser <T extends MyNumber<T>> extends BaseParser<T> {
+public class ExpressionParser <T extends MyNumber<T, ? extends Number>> extends BaseParser<T> {
     private static final int UNARY_PRIORITY = 0;
     private static final List<List<String>> LEVELS = List.of(
             List.of("*", "/"),

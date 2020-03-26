@@ -1,10 +1,12 @@
 package expression.generic;
 
-public class MyByte implements MyNumber<MyByte> {
-    private final Byte value;
+public class MyByte extends MyNumber<MyByte, Byte> {
+    public MyByte(byte value) {
+        super(value);
+    }
 
-    public MyByte(Number value) {
-        this.value = value.byteValue();
+    public MyByte(int value) {  // Byte анбоксится в int
+        super((byte) value);
     }
 
     @Override
@@ -44,15 +46,5 @@ public class MyByte implements MyNumber<MyByte> {
 
     public static MyByte parse(String str) {
         return new MyByte(Byte.parseByte(str));
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public Number getValue() {
-        return value;
     }
 }

@@ -1,10 +1,8 @@
 package expression.generic;
 
-public class MyInteger implements MyNumber<MyInteger> {
-    private final Integer value;
-
-    public MyInteger(Number value) {
-        this.value = value.intValue();
+public class MyInteger extends MyNumber<MyInteger, Integer> {
+    public MyInteger(int value) {
+        super(value);
     }
 
     @Override
@@ -44,15 +42,5 @@ public class MyInteger implements MyNumber<MyInteger> {
 
     public static MyInteger parse(String str) {
         return new MyInteger(Integer.parseInt(str));
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public Number getValue() {
-        return value;
     }
 }

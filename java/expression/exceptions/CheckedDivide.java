@@ -11,7 +11,7 @@ public class CheckedDivide extends Divide implements MultipleExpression {
     @Override
     protected int calculate(int left, int right) {
         if (right == 0) {
-            throw new ExpressionDBZException("Division by zero: " + left + " / " + right);
+            throw new ExpressionDBZException("Division by zero: " + left + " / " + right, e);
         }
         if (left == Integer.MIN_VALUE && right == -1) {
             throw new ExpressionOverflowException

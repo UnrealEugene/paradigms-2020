@@ -1,15 +1,14 @@
 package expression.generic;
 
-public class MyFloat implements MyNumber<MyFloat> {
-    private final Float value;
 
-    public MyFloat(Number value) {
-        this.value = value.floatValue();
+public class MyFloat extends MyNumber<MyFloat, Float> {
+    public MyFloat(float value) {
+        super(value);
     }
 
     @Override
     public MyFloat add(MyFloat other) {
-        return new MyFloat(value + other.value);
+        return new MyFloat(value - other.value);
     }
 
     @Override
@@ -44,15 +43,5 @@ public class MyFloat implements MyNumber<MyFloat> {
 
     public static MyFloat parse(String str) {
         return new MyFloat(Float.parseFloat(str));
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public Number getValue() {
-        return value;
     }
 }

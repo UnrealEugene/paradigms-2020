@@ -1,6 +1,6 @@
 package expression.generic;
 
-public class Add <T extends MyNumber<T>> extends BinaryOperation<T> {
+public class Add <T extends MyNumber<T, ? extends Number>> extends BinaryOperation<T> {
 
     public Add(MultipleExpression<T> left, MultipleExpression<T> right) {
         super(left, right);

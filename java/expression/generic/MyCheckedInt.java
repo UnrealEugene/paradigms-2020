@@ -4,11 +4,9 @@ import expression.exceptions.ExpressionCalculateException;
 import expression.exceptions.ExpressionDBZException;
 import expression.exceptions.ExpressionOverflowException;
 
-public class MyCheckedInt implements MyNumber<MyCheckedInt> {
-    private final int value;
-
-    public MyCheckedInt(Number value) {
-        this.value = value.intValue();
+public class MyCheckedInt extends MyNumber<MyCheckedInt, Integer> {
+    public MyCheckedInt(int value) {
+        super(value);
     }
 
     @Override
@@ -81,7 +79,7 @@ public class MyCheckedInt implements MyNumber<MyCheckedInt> {
     public MyCheckedInt divide(MyCheckedInt other) {
         int left = value, right = other.value;
         if (right == 0) {
-            throw new ExpressionDBZException("Division by zero: " + left + " / " + right);
+            throw new ExpressionDBZException("Division by zero: " + left + " / " + right, e);
         }
         if (left == Integer.MIN_VALUE && right == -1) {
             throw new ExpressionOverflowException
@@ -113,15 +111,5 @@ public class MyCheckedInt implements MyNumber<MyCheckedInt> {
 
     public static MyCheckedInt parse(String str) {
         return new MyCheckedInt(Integer.parseInt(str));
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public Number getValue() {
-        return value;
     }
 }

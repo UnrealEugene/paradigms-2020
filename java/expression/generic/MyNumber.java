@@ -1,19 +1,31 @@
 package expression.generic;
 
-public interface MyNumber<T> {
-    T add(T other);
+public abstract class MyNumber<T extends MyNumber<T, S>, S extends Number> {
+    protected final S value;
 
-    T subtract(T other);
+    protected MyNumber(S value) {
+        this.value = value;
+    }
 
-    T multiply(T other);
+    public abstract T add(T other);
 
-    T divide(T other);
+    public abstract T subtract(T other);
 
-    T negate();
+    public abstract T multiply(T other);
 
-    T bitCount();
+    public abstract T divide(T other);
 
-    int compareWith(T other);
+    public abstract T negate();
 
-    Number getValue();
+    public abstract T bitCount();
+
+    public abstract int compareWith(T other);
+
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    public S getValue() {
+        return value;
+    }
 }
