@@ -1,6 +1,6 @@
 "use strict";
 
-let variables = ['x', 'y', 'z'];  // Переменные и их порядок определяется здесь
+let variables = new Map([["x", 0], ["y", 1], ["z", 2]]);
 
 
 function Const(value) {
@@ -21,7 +21,7 @@ function Variable(name) {
     this.name = name;
 }
 Variable.prototype.evaluate = function(...argVar) {
-    return argVar[variables.indexOf(this.name)];
+    return argVar[variables.get(this.name)];
 };
 Variable.prototype.toString = function() {
     return this.name;
@@ -105,23 +105,15 @@ let ops = {  // Operations and special constants
 };
 
 function parse(input) {
-    let tokens = input.split(" ").filter(x => x.length > 0);  // Array of operands
-    let stack = [];                                           // Stack of processed operands
-    for (let i = 0; i < tokens.length; i++) {
-        let token = tokens[i];
+    return input.split(" ").filter(x => x.length > 0).reduce((stack, token) => {
         if (token in ops) {                          // Operations and special constants
             let op = ops[token];
-            let argsCnt = op.args;
-            let args = [];
-            for (let i = 0; i < argsCnt; i++) {
-                args.push(stack.pop());
-            }
-            stack.push(new op.func(...args.reverse()));
-        } else if (variables.includes(token)) {      // Variables (условие оптимизируется компилятором)
+            stack.push(new op.func(...stack.splice(-op.args)));
+        } else if (variables.has(token)) {      // Variables
             stack.push(new Variable(token));
         } else {                                     // Constants
             stack.push(new Const(+token));
         }
-    }
-    return stack[0];
+        return stack;
+    }, [])[0];
 }

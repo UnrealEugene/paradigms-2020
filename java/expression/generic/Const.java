@@ -2,7 +2,7 @@ package expression.generic;
 
 import java.util.Map;
 
-public class Const <T extends MyNumber<T>> implements MultipleExpression<T> {
+public class Const <T extends Number> implements MultipleExpression<T> {
     private final T value;
 
     public Const(final T value) {
@@ -15,7 +15,7 @@ public class Const <T extends MyNumber<T>> implements MultipleExpression<T> {
     }
 
     @Override
-    public T evaluate(Map<String, T> vars) {
+    public T evaluate(Calculator<T> calc, Map<String, T> vars) {
         return value;
     }
 }

@@ -1,6 +1,6 @@
 package expression.generic;
 
-public class Negate <T extends MyNumber<T>> extends UnaryOperation<T> {
+public class Negate <T extends Number> extends UnaryOperation<T> {
 
     public Negate(MultipleExpression<T> arg) {
         super(arg);
@@ -12,5 +12,5 @@ public class Negate <T extends MyNumber<T>> extends UnaryOperation<T> {
     }
 
     @Override
-    protected T calculate(T arg) { return arg.negate(); }
+    protected T calculate(Calculator<T> calc, T arg) { return calc.negate(arg); }
 }

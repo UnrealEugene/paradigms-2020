@@ -1,8 +1,6 @@
 package expression.generic;
 
-import expression.parser.StringSource;
-
-public abstract class BaseParser <T extends MyNumber<T>> implements Parser<T> {
+public abstract class BaseParser <T extends Number> implements Parser<T> {
     protected StringSource currentSource = null;
 
     protected void skipWhitespaces() {

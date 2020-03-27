@@ -1,6 +1,6 @@
 package expression.generic;
 
-public class Maximum <T extends MyNumber<T>> extends BinaryOperation<T> {
+public class Maximum <T extends Number> extends BinaryOperation<T> {
 
     public Maximum(MultipleExpression<T> left, MultipleExpression<T> right) {
         super(left, right);
@@ -12,5 +12,5 @@ public class Maximum <T extends MyNumber<T>> extends BinaryOperation<T> {
     }
 
     @Override
-    protected T calculate(T left, T right) { return left.compareWith(right) >= 0 ? left : right; }
+    protected T calculate(Calculator<T> calc, T left, T right) { return calc.compareWith(left, right) >= 0 ? left : right; }
 }

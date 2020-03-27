@@ -2,9 +2,9 @@
 
 let custom = (op) => (...argsOp) => (...argsVar) => op(...argsOp.map(a => a(...argsVar)));
 
-let variables = ["x", "y", "z"];  // Переменные и их порядок определяется здесь
+let variables = new Map([["x", 0], ["y", 1], ["z", 2]]);  // Переменные
 
-let variable = (v) => (...args) => args[variables.indexOf(v)];  // Оптимизируется компилятором
+let variable = (v) => (...args) => args[variables.get(v)];
 
 
 let cnst = v => () => v;
@@ -36,25 +36,17 @@ let ops = {  // Operations and special constants
 };
 
 function parse(input) {
-    let tokens = input.split(" ").filter(x => x.length > 0);  // Array of operands
-    let stack = [];                                           // Stack of processed operands
-    for (let i = 0; i < tokens.length; i++) {
-        let token = tokens[i];
+    return input.split(" ").filter(x => x.length > 0).reduce((stack, token) => {
         if (token in ops) {                          // Operations and special constants
             let op = ops[token];
-            let argsCnt = op.args;
-            let args = [];
-            for (let i = 0; i < argsCnt; i++) {
-                args.push(stack.pop());
-            }
-            stack.push(op.func(...args.reverse()));
-        } else if (variables.includes(token)) {      // Variables (условие оптимизируется компилятором)
+            stack.push(op.func(...stack.splice(-op.args)));
+        } else if (variables.has(token)) {      // Variables
             stack.push(variable(token));
         } else {                                     // Constants
             stack.push(cnst(+token));
         }
-    }
-    return stack[0];
+        return stack;
+    }, [])[0];
 }
 
 let e = add(

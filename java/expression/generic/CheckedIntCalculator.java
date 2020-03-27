@@ -1,17 +1,8 @@
 package expression.generic;
 
-import expression.exceptions.ExpressionCalculateException;
-import expression.exceptions.ExpressionDBZException;
-import expression.exceptions.ExpressionOverflowException;
-
-public class MyCheckedInt extends MyNumber<MyCheckedInt, Integer> {
-    public MyCheckedInt(int value) {
-        super(value);
-    }
-
+public class CheckedIntCalculator extends Calculator<Integer> {
     @Override
-    public MyCheckedInt add(MyCheckedInt other) {
-        int left = value, right = other.value;
+    public Integer add(Integer left, Integer right) {
         if (left > right) {
             int t = right;
             right = left;
@@ -27,12 +18,11 @@ public class MyCheckedInt extends MyNumber<MyCheckedInt, Integer> {
                         ("Addition overflow: " + left + " + " + right + " < " + Integer.MIN_VALUE);
             }
         }
-        return new MyCheckedInt(left + right);
+        return left + right;
     }
 
     @Override
-    public MyCheckedInt subtract(MyCheckedInt other) {
-        int left = value, right = other.value;
+    public Integer subtract(Integer left, Integer right) {
         if (left >= 0 && right <= 0 && left > Integer.MAX_VALUE + right) {
             throw new ExpressionCalculateException
                     ("Subtract overflow: " + left + " - " + right + " > " + Integer.MAX_VALUE);
@@ -41,12 +31,11 @@ public class MyCheckedInt extends MyNumber<MyCheckedInt, Integer> {
             throw new ExpressionCalculateException
                     ("Subtract overflow: " + left + " - " + right + " < " + Integer.MIN_VALUE);
         }
-        return new MyCheckedInt(left - right);
+        return left - right;
     }
 
     @Override
-    public MyCheckedInt multiply(MyCheckedInt other) {
-        int left = value, right = other.value;
+    public Integer multiply(Integer left, Integer right) {
         if (left > 0) {
             if (right > 0) {
                 if (left > Integer.MAX_VALUE / right) {
@@ -72,44 +61,49 @@ public class MyCheckedInt extends MyNumber<MyCheckedInt, Integer> {
                 }
             }
         }
-        return new MyCheckedInt(left * right);
+        return left * right;
     }
 
     @Override
-    public MyCheckedInt divide(MyCheckedInt other) {
-        int left = value, right = other.value;
+    public Integer divide(Integer left, Integer right) {
         if (right == 0) {
-            throw new ExpressionDBZException("Division by zero: " + left + " / " + right, e);
+            throw new ExpressionDBZException("Division by zero: " + left + " / " + right);
         }
         if (left == Integer.MIN_VALUE && right == -1) {
             throw new ExpressionOverflowException
                     ("Divide overflow: " + left + " / " + right + " > " + Integer.MAX_VALUE);
         }
-        return new MyCheckedInt(left / right);
+        return left / right;
     }
 
 
 
     @Override
-    public MyCheckedInt negate() {
-        if (value == Integer.MIN_VALUE) {
+    public Integer negate(Integer arg) {
+        if (arg == Integer.MIN_VALUE) {
             throw new ExpressionOverflowException
-                    ("Negate overflow: -(" + value + ") > " + Integer.MAX_VALUE);
+                    ("Negate overflow: -(" + arg + ") > " + Integer.MAX_VALUE);
         }
-        return new MyCheckedInt(-value);
+        return -arg;
     }
 
     @Override
-    public MyCheckedInt bitCount() {
-        return new MyCheckedInt(Integer.bitCount(value));
+    public Integer bitCount(Integer arg) {
+        return Integer.bitCount(arg);
     }
 
     @Override
-    public int compareWith(MyCheckedInt other) {
-        return Integer.compare(value, other.value);
+    public int compareWith(Integer left, Integer right) {
+        return Integer.compare(left, right);
     }
 
-    public static MyCheckedInt parse(String str) {
-        return new MyCheckedInt(Integer.parseInt(str));
+    @Override
+    public Integer parse(String str) {
+        return Integer.parseInt(str);
+    }
+
+    @Override
+    public Integer valueOf(int arg) {
+        return arg;
     }
 }

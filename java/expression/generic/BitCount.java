@@ -1,6 +1,6 @@
 package expression.generic;
 
-public class BitCount <T extends MyNumber<T>> extends UnaryOperation<T> {
+public class BitCount <T extends Number> extends UnaryOperation<T> {
 
     public BitCount(MultipleExpression<T> arg) {
         super(arg);
@@ -12,5 +12,5 @@ public class BitCount <T extends MyNumber<T>> extends UnaryOperation<T> {
     }
 
     @Override
-    protected T calculate(T arg) { return arg.bitCount(); }
+    protected T calculate(Calculator<T> calc, T arg) { return calc.bitCount(arg); }
 }

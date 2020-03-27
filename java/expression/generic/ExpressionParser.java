@@ -1,15 +1,12 @@
 package expression.generic;
 
-import expression.exceptions.*;
-import expression.parser.StringSource;
-
 import java.util.List;
 //
 //interface MyNumberParser <T extends MyNumber<T, ? extends Number>> {
 //    T parse(String str);
 //}
 
-public class ExpressionParser <T extends MyNumber<T, ? extends Number>> extends BaseParser<T> {
+public class ExpressionParser <T extends Number> extends BaseParser<T> {
     private static final int UNARY_PRIORITY = 0;
     private static final List<List<String>> LEVELS = List.of(
             List.of("*", "/"),
@@ -97,7 +94,7 @@ public class ExpressionParser <T extends MyNumber<T, ? extends Number>> extends 
                 return new Negate<>(parseExpression(UNARY_PRIORITY));
             }
         } else if (currentSource.isEnd()) {
-            throw new ParserUnexpectedEndExсeption
+            throw new ParserUnexpectedEndException
                     ("Unexpected end of string", currentSource.getCurrentPos());
         } else {
             throw new ParserUnresolvedSymbolException
@@ -168,7 +165,7 @@ public class ExpressionParser <T extends MyNumber<T, ? extends Number>> extends 
     protected void expect(char c) {
         if (!check(c)) {
             if (currentSource.isEnd()) {
-                throw new ParserUnexpectedEndExсeption
+                throw new ParserUnexpectedEndException
                         ("Unexpected end of string: expected '" + c + "'", currentSource.getCurrentPos());
             }
             throw new ParserUnresolvedSymbolException

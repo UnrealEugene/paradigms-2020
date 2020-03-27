@@ -1,6 +1,6 @@
 package expression.generic;
 
-public class Divide <T extends MyNumber<T>> extends BinaryOperation<T> {
+public class Divide <T extends Number> extends BinaryOperation<T> {
 
     public Divide(MultipleExpression<T> left, MultipleExpression<T> right) {
         super(left, right);
@@ -12,5 +12,5 @@ public class Divide <T extends MyNumber<T>> extends BinaryOperation<T> {
     }
 
     @Override
-    protected T calculate(T left, T right) { return left.divide(right); }
+    protected T calculate(Calculator<T> calc, T left, T right) { return calc.divide(left, right); }
 }

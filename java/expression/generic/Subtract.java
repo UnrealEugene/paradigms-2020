@@ -1,6 +1,6 @@
 package expression.generic;
 
-public class Subtract <T extends MyNumber<T>> extends BinaryOperation<T> {
+public class Subtract <T extends Number> extends BinaryOperation<T> {
 
     public Subtract(MultipleExpression<T> left, MultipleExpression<T> right) {
         super(left, right);
@@ -12,5 +12,5 @@ public class Subtract <T extends MyNumber<T>> extends BinaryOperation<T> {
     }
 
     @Override
-    protected T calculate(T left, T right) { return left.subtract(right); }
+    protected T calculate(Calculator<T> calc, T left, T right) { return calc.subtract(left, right); }
 }
