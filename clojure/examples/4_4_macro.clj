@@ -61,7 +61,7 @@
              *digit (+char (apply str (filter #(Character/isDigit %) *all-chars)))
              *space (+char (apply str (filter #(Character/isWhitespace %) *all-chars)))
              *ws (+ignore (+star *space))
-             *number (+map read-string (+str (+plus *digit)))
+             *constant (+map read-string (+str (+plus *digit)))
              *identifier (+str (+seqf cons *letter (+star (+or *letter *digit))))
              *string (+seqn 1 \" (+str (+star (+char-not "\""))) \")
              (*seq [begin p end]
@@ -69,7 +69,7 @@
              *array (*seq \[ (delay *value) \])
              *member (+seq *identifier *ws (+ignore \:) *ws (delay *value))
              *object (+map (partial reduce #(apply assoc %1 %2) {}) (*seq \{ *member \}))
-             *value (+or *null *number *string *object *array)
+             *value (+or *null *constant *string *object *array)
              *json (+seqn 0 *ws *value)))
          (json "[1, {a: \"hello\", b: [1, 2, 3]}, null]")
          (json "[1, {a: \"hello\", b: [1, 2, 3]}, null]~"))

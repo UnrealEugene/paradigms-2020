@@ -15,7 +15,7 @@
 (defn f-softmax [& args] (/ (Math/exp (first args)) (apply f-sumexp args)))
 (def softmax (expression f-softmax))
 
-(defn constant [x] (fn [vars] x))
+(defn constant [x] (fn [vars] (double x)))
 (defn variable [var] (fn [vars] (get vars var)))
 
 (def ops-function
@@ -42,9 +42,10 @@
   (cond
     (contains? obj key) (obj key)
     (contains? obj :proto) (recur (obj :proto) key)))
-
 (defn proto-call [obj key & args]
   (apply (proto-get obj key) obj args))
+(defn proto-call-static [obj key & args]
+  (apply (proto-get obj key) args))
 (defn method [key]
   (fn [obj & args] (apply proto-call obj key args)))
 (defn constructor [cons proto]
@@ -64,7 +65,7 @@
    :to-str-infix (method :to-str)                           ; for HW12
    })
 (defn constant-cons [this value]
-  (assoc this :value value))
+  (assoc this :value (double value)))
 (def Constant (constructor constant-cons constant-proto))
 
 (def zero (Constant 0.0))
@@ -83,50 +84,51 @@
 (def operation-proto
   {:eval (fn [this vars]
            (apply (proto-get this :op) (mapv #(proto-call % :eval vars) (proto-get this :args)))),
-   :diff (fn [this var]
-           ((proto-get this :diff-op)
-             (proto-get this :args)
-             (mapv #(proto-call % :diff var) (proto-get this :args)))),
    :to-str (fn rec [this]
              (str "(" (proto-get this :sign) " "
-                  (clojure.string/join " " (mapv rec (proto-get this :args))) ")")),
+                  (clojure.string/join " " (mapv (method :to-str) (proto-get this :args))) ")")),
    :to-str-infix (fn rec [this]
-                   (if (proto-get this :infix)
-                     (str "("
-                          (clojure.string/join
-                            (str " " (proto-get this :sign) " ")
-                            (mapv (method :to-str-infix) (proto-get this :args)))
-                          ")")
-                     (str "(" (proto-get this :sign) " "
-                          (clojure.string/join " " (mapv (method :to-str-infix) (proto-get this :args))) ")")))
+                   (let [sign_ (proto-get this :sign)
+                         args_ (proto-get this :args)]
+                     (if (= 1 (count args_))                ; unary?
+                       (str sign_ "(" ((method :to-str-infix) (first args_)) ")")
+                       (str "(" (clojure.string/join (str " " sign_ " ") (mapv (method :to-str-infix) args_)) ")"))))
+   })
+
+(def operation-diff-proto
+  {:proto operation-proto,
+   :diff (fn [this var]
+           (proto-call-static this :diff-op
+             (proto-get this :args)
+             (mapv #(proto-call % :diff var) (proto-get this :args))))
    })
 (defn operation-cons [this & args]
   (assoc this :args args))
 
-(defn custom-op [sign op diff-op infix]
-  (let [custom-proto {:proto operation-proto, :sign sign, :op op, :diff-op diff-op, :infix infix}]
-    (constructor operation-cons custom-proto)))
+
+(defn custom-op [sign op]
+  (constructor operation-cons {:proto operation-proto, :sign sign, :op op}))
+
+(defn custom-diff-op [sign op diff-op]
+  (constructor operation-cons {:proto operation-diff-proto, :sign sign, :op op, :diff-op diff-op}))
 
 (def Add
-  (custom-op
+  (custom-diff-op
     "+"
     +
-    (fn [v dv] (apply Add dv))
-    true))
+    (fn [v dv] (apply Add dv))))
 
 (def Subtract
-  (custom-op
+  (custom-diff-op
     "-"
     -
-    (fn [v dv] (apply Subtract dv))
-    true))
+    (fn [v dv] (apply Subtract dv))))
 
 (def Negate
-  (custom-op
+  (custom-diff-op
     "negate"
     -
-    (fn [v dv] (apply Negate dv))
-    false))
+    (fn [v dv] (apply Negate dv))))
 
 (declare Multiply)
 (defn multiply-diff [v dv]
@@ -140,11 +142,10 @@
            (list (first v) (first dv))
            (mapv list (rest v) (rest dv)))))
 (def Multiply
-  (custom-op
+  (custom-diff-op
     "*"
     *
-    multiply-diff
-    true))
+    multiply-diff))
 
 (declare Divide)
 (defn divide-diff [v dv]
@@ -159,23 +160,21 @@
       (letfn [(Sqr [x] (Multiply x x))]
         (Sqr (apply Multiply (rest v)))))))
 (def Divide
-  (custom-op
+  (custom-diff-op
     "/"
     #(if (empty? %&) (/ 1.0 %1) (/ (double %1) (apply * %&)))
-    divide-diff
-    true))
+    divide-diff))
 
 (declare Sumexp)
 (defn sumexp-diff [v dv] (apply Add (mapv #(Multiply (Sumexp %1) %2) v dv)))
 (def Sumexp
-  (custom-op
+  (custom-diff-op
     "sumexp"
     f-sumexp
-    sumexp-diff
-    false))
+    sumexp-diff))
 
 (def Softmax
-  (custom-op
+  (custom-diff-op
     "softmax"
     f-softmax
     (fn [v dv]
@@ -185,14 +184,43 @@
           (apply Sumexp v))
         (list
           (sumexp-diff (list (first v)) (list (first dv)))
-          (sumexp-diff v dv))))
-    false))
+          (sumexp-diff v dv))))))
+
+(defn logic [f]
+  #(Double/longBitsToDouble (f (Double/doubleToLongBits %1) (Double/doubleToLongBits %2))))
+
+(def And                                                    ; HW 12
+  (custom-op
+    "&"
+    (logic bit-and)))
+
+(def Or                                                     ; HW 12
+  (custom-op
+    "|"
+    (logic bit-or)))
+
+(def Xor                                                    ; HW 12
+  (custom-op
+    "^"
+    (logic bit-xor)))
+
+(def Impl                                                   ; HW 12
+  (custom-op
+    "=>"
+    (logic #(bit-or (bit-not %1) %2))))
+
+(def Iff                                                    ; HW 12
+  (custom-op
+    "<=>"
+    (logic (comp bit-not bit-xor))))
 
 (def ops-object
   {"+" Add, "-" Subtract,
    "*" Multiply, "/" Divide,
    "negate" Negate,
-   "sumexp" Sumexp, "softmax" Softmax})
+   "sumexp" Sumexp, "softmax" Softmax,
+   "&" And, "|" Or, "^" Xor,
+   "=>" Impl, "<=>" Iff})
 
 (def parseObject (create-parser Variable Constant ops-object))
 
@@ -200,6 +228,7 @@
 ; |HW12|
 ; +----+
 
+; <FROM LECTURE>
 (defn -return [value tail] {:value value, :tail tail})
 (def -value :value)
 (def -tail :tail)
@@ -209,44 +238,28 @@
   (if (-valid result)
     (str " -> " (pr-str (-value result)) " | " (pr-str (apply str (-tail result))))
     "!"))
-
 (defn _tabulate [parser inputs]
   (run! (fn [input] (printf "   %-10s %s\n" (pr-str input) (_show (parser input)))) inputs))
 
-(defn _show-obj [result]
-  (if (-valid result)
-    (str " -> " (toStringInfix (-value result)) " | " (pr-str (apply str (-tail result))))
-    "!"))
-
-(defn _tabulate-obj [parser inputs]
-  (run! (fn [input] (printf "   %-10s %s\n" (pr-str input) (_show-obj (parser input)))) inputs))
-
 (defn _empty [value] (partial -return value))
-
 (defn _char [pred]
   (fn [[c & cs]]
     (if (and c (pred c)) (-return c cs))))
-
 (defn _map [f result]
   (if (-valid result)
     (-return (f (-value result)) (-tail result))))
-
-;(_tabulate (comp (partial _map #(Character/toUpperCase %)) (_char #{\a \b \c})) ["a" "a~" "ba" "qa"])
-
 (defn _combine [f a b]
   (fn [input]
     (let [ar ((force a) input)]
       (if (-valid ar)
         (_map (fn [bv] (f (-value ar) bv))
               ((force b) (-tail ar)))))))
-
 (defn _either [a b]
   (fn [input]
     (let [ar ((force a) input)]
       (if (-valid ar)
         ar
         ((force b) input)))))
-
 (defn _parser [p]                                           ; sth -> sth
   (fn [input] (-value ((_combine (fn [v _] v) p (_char #{\u0000})) (str input \u0000)))))
 (defn +char [chars] (_char (set chars)))                    ; string -> symbol (in string)
@@ -267,43 +280,69 @@
   (+seqf cons parser (+star parser)))
 (defn +seqn [n & ps]                                        ; list of sth -> sth
   (apply +seqf (fn [values] (nth values n)) ps))
-(defn +nth [n p] (+map #(nth % n) p))                      ; list of sth -> sth
-(defn +exact [[& cs]] (apply +seq (mapv #(+char (str %)) cs))) ; string -> string
 (defn +str [parser] (+map (partial apply str) parser))      ; list of sth -> string via concat
-(def *digit (+char "0123456789"))                           ; -> symbol (digit)
-(def *number
-  (+map (comp Constant double read-string)
+; </FROM LECTURE>
+
+(defn +nth [n p] (+map #(nth % n) p))                      ; list of sth -> sth
+(defn +exact [[& cs]] (+str (apply +seq (mapv #(+char (str %)) cs)))) ; string -> string
+(defn +any-exact [[& ss]] (apply +or (mapv #(+exact %) ss)))
+
+(def *ws (+ignore (+star (_char #(Character/isWhitespace %)))))
+
+(def *digit (_char #(Character/isDigit %)))
+(def *constant
+  (+map (comp Constant read-string)
         (+str (+seq
                 (+opt (+char "+-"))
                 (+str (+plus *digit))
-                (+opt (+str (+seq (+char ".") (+str (+star *digit))))))))) ; -> string ("cnst(%)")
-(def *letter (_char #(Character/isLetter %)))               ; -> symbol (letter)
-(def *operand (+str (+seqf cons *letter (+star (+or *letter *digit))))) ; -> string (operand)
-(def *space (_char #(Character/isWhitespace %)))            ; -> symbol (whitespace)
-(def *not-space (_char (comp not #(Character/isWhitespace %)))) ; -> symbol (not whitespace)
-(def *ws (+ignore (+star *space)))                          ; -> 'ignore (whitespace)
+                (+opt (+str (+seq (+char ".") (+str (+star *digit)))))))))
 
 (def variables '("x" "y" "z"))
-(def *variable (+map Variable (+str (apply +or (mapv #(+exact %) variables))))) ; -> string ("var(%)")
+(def *variable (+map Variable (+str (apply +or (mapv #(+exact %) variables)))))
 
-(declare *factor *term *expr *brackets)
-(declare *term *prior-min *prior-max)
-(def *brackets (+nth 0 (+seq (+ignore (+char "(")) *ws (delay *prior-min) *ws (+ignore (+char ")")))))
-(def *term (+nth 0 (+seq *ws (+or *number *variable *brackets))))
+(def infix-ops-by-priority
+  '((:left "<=>")            ; lowest
+    (:right "=>")
+    (:left "^")
+    (:left "|")
+    (:left "&")
+    (:left "+" "-")
+    (:left "*" "/")))        ; highest
+(def unary-ops '("negate"))
 
-(def infix-ops-by-priority '("+-" "*/" ))
-(def unary-ops '("negate" "sumexp" "softmax"))
+(declare *priority-n)
+(def *brackets (+nth 0 (+seq (+ignore (+char "(")) *ws (delay (*priority-n 0)) *ws (+ignore (+char ")")))))
+(def *factor (+nth 0 (+seq *ws (+or *constant *variable *brackets))))
+(def *unary (+or *factor (+map (fn [[op x]] ((ops-object op) x))
+                               (+seq *ws (+any-exact unary-ops) *ws (delay *unary)))))
 
-(def *prior-max
-  (+map (fn [[f lst]] (reduce #((ops-object (str (first %2))) %1 (fnext %2)) f lst))
-        (+nth 0 (+seq *ws (+seq *term (+star (+seq *ws (+char "*/") *term)))))))
+; [E1 op-str1 E2 op-str2 ... op-strN EN+1] -> [E1 ((op-str1 E2) ... ("op-strN" EN+1))]
+(defn list-to-left [x] (list (first x) (mapv
+                                     #(list %1 %2)
+                                     (filter (partial contains? ops-object) (rest x))
+                                     (filter (comp not (partial contains? ops-object)) (rest x)))))
 
-(def *prior-min
-  (+map (fn [[f lst]] (reduce #((ops-object (str (first %2))) %1 (fnext %2)) f lst))
-        (+nth 0 (+seq *ws (+seq *prior-max (+star (+seq *ws (+char "+-") *prior-max)))))))
+; [E1 op-str1 E2 op-str2 ... op-strN EN+1] -> [EN+1 ((op-strN EN) ... ("op-str1" E1))]
+(defn list-to-right [x] (list-to-left (reverse x)))
 
-(_tabulate-obj *prior-min ["2"])
-(_tabulate-obj *prior-min ["2" "2.5" "1." "( 2  )" "x" "x+2" "3+4-7" "2  + 2 * 2" "3 / 3 / 3" "x * (3 - y) + z / 3"])
-(println (double (read-string "2.5")))
+; [E op-str E op-str ... op-str E] -> object expression
+(defn to-object [n]
+  (fn [x] (let [[f lst] (if (= :left (first (nth infix-ops-by-priority n))) (list-to-left x) (list-to-right x))]
+                (reduce
+                  #(apply (ops-object (str (first %2)))
+                     (if (= :left (first (nth infix-ops-by-priority n)))
+                       [%1 (fnext %2)]
+                       [(fnext %2) %1]))
+                  f lst))))
 
-(def parseObjectInfix (_parser *prior-min))
+(defn *priority-n [n]
+  (+map (to-object n)
+        (let [*next (if (= (inc n) (count infix-ops-by-priority)) *unary (*priority-n (inc n)))]
+          (+seqf cons
+            *ws *next
+            (+map (partial apply concat)
+              (+star (+seq *ws (+any-exact (rest (nth infix-ops-by-priority n))) *next)))))))
+
+(def *expression (+nth 0 (+seq (*priority-n 0) *ws)))
+
+(def parseObjectInfix (_parser *expression))

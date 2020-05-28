@@ -3,8 +3,8 @@
 (section "Simple parsers")
 (example "*number"
          (def *digit (+char "0123456789"))
-         (def *number (+map read-string (+str (+plus *digit))))
-         (tabulate *number ["1" "1~" "12~" "123~" "" "~"]))
+         (def *constant (+map read-string (+str (+plus *digit))))
+         (tabulate *constant ["1" "1~" "12~" "123~" "" "~"]))
 (example "*string"
          (def *string
            (+seqn 1 (+char "\"") (+str (+star (+char-not "\""))) (+char "\"")))
@@ -28,39 +28,39 @@
 (example "One element"
          (defn *array [p]
            (+seqn 1 (+char "[") p (+char "]")))
-         (tabulate (*array *number) ["[]" "[1]" "[1,2]" "[1,2,3]" "[1, 2]" "[ 1 , 2 , 3 ]" "[1,2]~" "123" ""]))
+         (tabulate (*array *constant) ["[]" "[1]" "[1,2]" "[1,2,3]" "[1, 2]" "[ 1 , 2 , 3 ]" "[1,2]~" "123" ""]))
 (example "One optional element"
          (defn *array [p]
            (+seqn 1 (+char "[") (+opt p) (+char "]")))
-         (tabulate (*array *number) ["[]" "[1]" "[1,2]" "[1,2,3]" "[1, 2]" "[ 1 , 2 , 3 ]" "[1,2]~" "123" ""]))
+         (tabulate (*array *constant) ["[]" "[1]" "[1,2]" "[1,2,3]" "[1, 2]" "[ 1 , 2 , 3 ]" "[1,2]~" "123" ""]))
 (example "Multiple elements preview"
          (defn *array [p]
            (+seqn 1 (+char "[") (+opt (+seq p (+star (+seqn 1 (+char ",") p)))) (+char "]")))
-         (tabulate (*array *number) ["[]" "[1]" "[1,2]" "[1,2,3]" "[1, 2]" "[ 1 , 2 , 3 ]" "[1,2]~" "123" ""]))
+         (tabulate (*array *constant) ["[]" "[1]" "[1,2]" "[1,2,3]" "[1, 2]" "[ 1 , 2 , 3 ]" "[1,2]~" "123" ""]))
 (example "Multiple elements"
          (defn *array [p]
            (+seqn 1 (+char "[") (+opt (+seqf cons p (+star (+seqn 1 (+char ",") p)))) (+char "]")))
-         (tabulate (*array *number) ["[]" "[1]" "[1,2]" "[1,2,3]" "[1, 2]" "[ 1 , 2 , 3 ]" "[1,2]~" "123" ""]))
+         (tabulate (*array *constant) ["[]" "[1]" "[1,2]" "[1,2,3]" "[1, 2]" "[ 1 , 2 , 3 ]" "[1,2]~" "123" ""]))
 (example "Whitespace handling"
          (defn *array [p]
            (+seqn 1 (+char "[") (+opt (+seqf cons *ws p (+star (+seqn 1 *ws (+char ",") *ws p)))) *ws (+char "]")))
-         (tabulate (*array *number) ["[]" "[1]" "[1,2]" "[1,2,3]" "[1, 2]" "[ 1 , 2 , 3 ]" "[1,2]~" "123" ""]))
+         (tabulate (*array *constant) ["[]" "[1]" "[1,2]" "[1,2,3]" "[1, 2]" "[ 1 , 2 , 3 ]" "[1,2]~" "123" ""]))
 (example "Sequence-based"
          (defn *seq [begin p end]
            (+seqn 1 (+char begin) (+opt (+seqf cons *ws p (+star (+seqn 1 *ws (+char ",") *ws p)))) *ws (+char end)))
          (defn *array [p] (*seq "[" p "]"))
-         (tabulate (*array *number) ["[]" "[1]" "[1,2]" "[1,2,3]" "[1, 2]" "[ 1 , 2 , 3 ]" "[1,2]~" "123" ""]))
+         (tabulate (*array *constant) ["[]" "[1]" "[1,2]" "[1,2,3]" "[1, 2]" "[ 1 , 2 , 3 ]" "[1,2]~" "123" ""]))
 
 (section "Objects")
 (example "*member: key-value pair"
          (defn *member [p] (+seq *identifier *ws (+ignore (+char ":")) *ws p))
-         (tabulate (*member *number) ["a:2" "a: 2" "a : 2", "a : " "2 : 2"]))
+         (tabulate (*member *constant) ["a:2" "a: 2" "a : 2", "a : " "2 : 2"]))
 (example "*object: preview"
          (defn *object [p] (*seq "{" (*member p) "}"))
-         (tabulate (*object *number) ["123" "{}" "{a:1}" "{a : 1 , boo : 2}"]))
+         (tabulate (*object *constant) ["123" "{}" "{a:1}" "{a : 1 , boo : 2}"]))
 (example "*object: as map"
          (defn *object [p] (+map (partial reduce #(apply assoc %1 %2) {}) (*seq "{" (*member p) "}")))
-         (tabulate (*object *number) ["123" "{}" "{a:1}" "{a : 1 , boo : 2}"]))
+         (tabulate (*object *constant) ["123" "{}" "{a:1}" "{a : 1 , boo : 2}"]))
 
 (section "JSON")
 (example "Partial"
@@ -68,7 +68,7 @@
            (letfn [(*value []
                      (delay (+or
                               *null
-                              *number
+                              *constant
                               *string
                               (*object (*value))
                               (*array (*value)))))]
