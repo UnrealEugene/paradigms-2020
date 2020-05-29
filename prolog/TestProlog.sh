@@ -19,7 +19,7 @@ javac \
     -d "__out" \
     "--class-path=$LIB/*:$REPO/java:$REPO/javascript:$REPO/prolog" \
     "$prolog/${TEST//\.//}.java"
-java \
+java diff
     -ea \
     "--class-path=$LIB/*:__out" \
     "$TEST" "${2-}"
