@@ -7,7 +7,8 @@
 (def add (expression +))
 (def subtract (expression -))
 (def multiply (expression *))
-(def divide (expression #(/ (double %1) (apply * %&))))
+(def f-divide #(if (empty? %&) (/ 1.0 %1) (/ (double %1) (apply * %&))))
+(def divide f-divide)
 (def negate (expression -))
 
 (defn f-sumexp [& args] (apply + (mapv #(Math/exp %) args)))
@@ -87,7 +88,7 @@
    :to-str (fn rec [this]
              (str "(" (proto-get this :sign) " "
                   (clojure.string/join " " (mapv (method :to-str) (proto-get this :args))) ")")),
-   :to-str-infix (fn rec [this]
+   :to-str-infix (fn rec [this]                             ; for HW12
                    (let [sign_ (proto-get this :sign)
                          args_ (proto-get this :args)]
                      (if (= 1 (count args_))                ; unary?
@@ -99,8 +100,8 @@
   {:proto operation-proto,
    :diff (fn [this var]
            (proto-call-static this :diff-op
-             (proto-get this :args)
-             (mapv #(proto-call % :diff var) (proto-get this :args))))
+                              (proto-get this :args)
+                              (mapv #(proto-call % :diff var) (proto-get this :args))))
    })
 (defn operation-cons [this & args]
   (assoc this :args args))
@@ -131,16 +132,16 @@
     (fn [v dv] (apply Negate dv))))
 
 (declare Multiply)
-(defn multiply-diff [v dv]
+(defn multiply-diff [[v & vs] [dv & dvs]]
   (fnext (reduce
-           (fn [acc next]
+           (fn [[af as] [nf ns]]
              (list
-               (Multiply (first acc) (first next))
+               (Multiply af nf)
                (Add
-                 (Multiply (fnext acc) (first next))
-                 (Multiply (first acc) (fnext next)))))
-           (list (first v) (first dv))
-           (mapv list (rest v) (rest dv)))))
+                 (Multiply as nf)
+                 (Multiply af ns))))
+           (list v dv)
+           (mapv list vs dvs))))
 (def Multiply
   (custom-diff-op
     "*"
@@ -148,21 +149,21 @@
     multiply-diff))
 
 (declare Divide)
-(defn divide-diff [v dv]
-  (if (= 1 (count v))
+(defn divide-diff [[v & vs] [dv & dvs]]
+  (if (empty? vs)
     (Divide
-      (Negate (first dv))
-      (Multiply (first v) (first v)))
+      (Negate dv)
+      (Multiply v v))
     (Divide
       (Subtract
-        (apply Multiply (first dv) (rest v))
-        (Multiply (first v) (multiply-diff (rest v) (rest dv))))
+        (apply Multiply dv vs)
+        (Multiply v (multiply-diff vs dvs)))
       (letfn [(Sqr [x] (Multiply x x))]
-        (Sqr (apply Multiply (rest v)))))))
+        (Sqr (apply Multiply v))))))
 (def Divide
   (custom-diff-op
     "/"
-    #(if (empty? %&) (/ 1.0 %1) (/ (double %1) (apply * %&)))
+    f-divide
     divide-diff))
 
 (declare Sumexp)
@@ -179,12 +180,10 @@
     f-softmax
     (fn [v dv]
       (divide-diff
-        (list
-          (Sumexp (first v))
-          (apply Sumexp v))
-        (list
-          (sumexp-diff (list (first v)) (list (first dv)))
-          (sumexp-diff v dv))))))
+        [(Sumexp (first v))
+         (apply Sumexp v)]
+        [(sumexp-diff (list (first v)) (list (first dv)))
+         (sumexp-diff v dv)]))))
 
 (defn logic [f]
   #(Double/longBitsToDouble (f (Double/doubleToLongBits %1) (Double/doubleToLongBits %2))))
@@ -298,51 +297,54 @@
                 (+opt (+str (+seq (+char ".") (+str (+star *digit)))))))))
 
 (def variables '("x" "y" "z"))
-(def *variable (+map Variable (+str (apply +or (mapv #(+exact %) variables)))))
-
-(def infix-ops-by-priority
-  '((:left "<=>")            ; lowest
-    (:right "=>")
-    (:left "^")
-    (:left "|")
-    (:left "&")
-    (:left "+" "-")
-    (:left "*" "/")))        ; highest
-(def unary-ops '("negate"))
-
-(declare *priority-n)
-(def *brackets (+nth 0 (+seq (+ignore (+char "(")) *ws (delay (*priority-n 0)) *ws (+ignore (+char ")")))))
-(def *factor (+nth 0 (+seq *ws (+or *constant *variable *brackets))))
-(def *unary (+or *factor (+map (fn [[op x]] ((ops-object op) x))
-                               (+seq *ws (+any-exact unary-ops) *ws (delay *unary)))))
+(def *variable (+map Variable (+str (+any-exact variables))))
 
 ; [E1 op-str1 E2 op-str2 ... op-strN EN+1] -> [E1 ((op-str1 E2) ... ("op-strN" EN+1))]
-(defn list-to-left [x] (list (first x) (mapv
-                                     #(list %1 %2)
-                                     (filter (partial contains? ops-object) (rest x))
-                                     (filter (comp not (partial contains? ops-object)) (rest x)))))
+(defn list-to-left [[f & r]]
+  (list f (mapv #(list %1 %2) (filter string? r) (filter (comp not string?) r))))
 
 ; [E1 op-str1 E2 op-str2 ... op-strN EN+1] -> [EN+1 ((op-strN EN) ... ("op-str1" E1))]
 (defn list-to-right [x] (list-to-left (reverse x)))
 
-; [E op-str E op-str ... op-str E] -> object expression
-(defn to-object [n]
-  (fn [x] (let [[f lst] (if (= :left (first (nth infix-ops-by-priority n))) (list-to-left x) (list-to-right x))]
-                (reduce
-                  #(apply (ops-object (str (first %2)))
-                     (if (= :left (first (nth infix-ops-by-priority n)))
-                       [%1 (fnext %2)]
-                       [(fnext %2) %1]))
-                  f lst))))
+(defn *expr-to-list [ops *next]
+  (+seqf cons
+         *ws *next
+         (+map (partial apply concat) (+star (+seq *ws (+any-exact ops) *next))) *ws))
 
-(defn *priority-n [n]
-  (+map (to-object n)
-        (let [*next (if (= (inc n) (count infix-ops-by-priority)) *unary (*priority-n (inc n)))]
-          (+seqf cons
-            *ws *next
-            (+map (partial apply concat)
-              (+star (+seq *ws (+any-exact (rest (nth infix-ops-by-priority n))) *next)))))))
+(defn *assoc [list-to-assoc f-unite]
+  (fn [*next mp]
+    (+map
+      (fn [x]
+        (let [[f lst] (list-to-assoc x)]
+          (reduce (fn [a [b c]] ((f-unite (mp b)) a c)) f lst)))
+      (*expr-to-list (keys mp) *next))))
 
-(def *expression (+nth 0 (+seq (*priority-n 0) *ws)))
+(def *left (*assoc list-to-left (fn [f] #(f %1 %2))))
+(def *right (*assoc list-to-right (fn [f] #(f %2 %1))))
+
+(declare *expression)
+(def *brackets (+nth 0 (+seq (+ignore (+char "(")) *ws (delay *expression) *ws (+ignore (+char ")")))))
+(def *factor (+nth 0 (+seq *ws (+or *constant *variable *brackets))))
+(defn *unary [mp] (+or *factor (+map (fn [[op x]] ((mp op) x))
+                               (+seq *ws (+any-exact (keys mp)) *ws (delay (*unary mp))))))
+
+(def -unary
+  (*unary {"negate" Negate}))
+(def -mul-div
+  (*left -unary {"*" Multiply, "/" Divide}))
+(def -add-sub
+  (*left -mul-div {"+" Add, "-" Subtract}))
+(def -and
+  (*left -add-sub {"&" And}))
+(def -or
+  (*left -and {"|" Or}))
+(def -xor
+  (*left -or {"^" Xor}))
+(def -impl
+  (*right -xor {"=>" Impl}))
+(def -iff
+  (*left -impl {"<=>" Iff}))
+
+(def *expression -iff)
 
 (def parseObjectInfix (_parser *expression))
